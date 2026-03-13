@@ -1,0 +1,21 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL!;
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', payload: { id } }),
+    });
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete arsip' }, { status: 500 });
+  }
+}
