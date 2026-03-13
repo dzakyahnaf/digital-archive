@@ -13,6 +13,9 @@
  *    ⚠️ PENTING: Karena script ini sekarang upload file ke Drive, Anda akan diminta
  *                 "Review Permissions" saat deploy. Izinkan akses ke Google Drive.
  * 6. Copy URL deployment, paste ke .env.local sebagai APPS_SCRIPT_URL
+ * 
+ * @OnlyCurrentDoc
+ * @NotOnlyCurrentDoc
  */
 
 const SHEET_NAME = 'Arsip';
@@ -23,6 +26,9 @@ function getSheet() {
 }
 
 function getOrCreateFolder(folderName) {
+  // Ini memaksa deteksi scope DriveApp agar muncul saat Authorization
+  DriveApp.getFiles(); 
+  
   var folders = DriveApp.getFoldersByName(folderName);
   if (folders.hasNext()) {
     return folders.next();
@@ -205,4 +211,13 @@ function initializeSheet() {
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
   sheet.setFrozenRows(1);
+}
+
+/**
+ * Jalankan fungsi ini HANYA SEKALI dari editor Apps Script
+ * untuk memancing munculnya popup Otorisasi Google Drive.
+ */
+function testAuthorization() {
+  getOrCreateFolder(FOLDER_NAME);
+  Logger.log("Otorisasi berhasil diberikan!");
 }
