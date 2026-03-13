@@ -21,5 +21,8 @@ export interface ArsipFormData {
   tahun: string;
   distrik: string;
   kelurahan: string;
-  linkDokumen: string;
+  linkDokumen?: string;
+  fileBase64?: string;
+  fileName?: string;
+  mimeType?: string;
 }

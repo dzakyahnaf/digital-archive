@@ -10,13 +10,43 @@
  * 5. Deploy → New Deployment → Web App
  *    - Execute as: Me
  *    - Who has access: Anyone
+ *    ⚠️ PENTING: Karena script ini sekarang upload file ke Drive, Anda akan diminta
+ *                 "Review Permissions" saat deploy. Izinkan akses ke Google Drive.
  * 6. Copy URL deployment, paste ke .env.local sebagai APPS_SCRIPT_URL
  */
 
 const SHEET_NAME = 'Arsip';
+const FOLDER_NAME = 'Arsip_Digital_Uploads'; // Folder tujuan upload di Drive
 
 function getSheet() {
   return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+}
+
+function getOrCreateFolder(folderName) {
+  var folders = DriveApp.getFoldersByName(folderName);
+  if (folders.hasNext()) {
+    return folders.next();
+  } else {
+    return DriveApp.createFolder(folderName);
+  }
+}
+
+function uploadToDrive(base64Data, fileName, mimeType) {
+  try {
+    const folder = getOrCreateFolder(FOLDER_NAME);
+    // Hapus header "data:image/png;base64," dari string base64 jika ada
+    const base64String = base64Data.split(',')[1] || base64Data;
+    
+    const blob = Utilities.newBlob(Utilities.base64Decode(base64String), mimeType, fileName);
+    const file = folder.createFile(blob);
+    
+    // Ubah permission file agar bisa diakses siapa saja yang punya link (opsional, disarankan agar bisa di-view dari web)
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    return file.getUrl();
+  } catch (e) {
+    throw new Error('Gagal upload ke Google Drive: ' + e.message);
+  }
 }
 
 function doPost(e) {
@@ -88,6 +118,15 @@ function addArsip(payload) {
   const id = Utilities.getUuid();
   const tanggalInput = new Date().toISOString();
   
+  let linkDokumen = '';
+  
+  if (payload.fileBase64 && payload.fileName && payload.mimeType) {
+    linkDokumen = uploadToDrive(payload.fileBase64, payload.fileName, payload.mimeType);
+  } else {
+    // Fallback if somehow someone still sends a text link
+    linkDokumen = payload.linkDokumen || '';
+  }
+  
   sheet.appendRow([
     id,
     payload.namaFile,
@@ -95,7 +134,7 @@ function addArsip(payload) {
     payload.tahun,
     payload.distrik,
     payload.kelurahan,
-    payload.linkDokumen,
+    linkDokumen,
     tanggalInput,
   ]);
   
@@ -108,7 +147,7 @@ function addArsip(payload) {
       tahun: payload.tahun,
       distrik: payload.distrik,
       kelurahan: payload.kelurahan,
-      linkDokumen: payload.linkDokumen,
+      linkDokumen: linkDokumen,
       tanggalInput: tanggalInput,
     }
   };
@@ -154,10 +193,6 @@ function getStats() {
   };
 }
 
-/**
- * Helper function to initialize the sheet with headers
- * Run this function once from the Apps Script editor
- */
 function initializeSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(SHEET_NAME);
