@@ -57,25 +57,44 @@ Aplikasi ini menggunakan sistem *Sign in with Google*.
 
 ---
 
-### Langkah 3: Konfigurasi Environment Variables
+### Langkah 3: Konfigurasi Environment Variables (`.env.local`)
 
-Aplikasi Next.js membutuhkan token-token dari langkah sebelumnya agar bisa berfungsi.
+Aplikasi Next.js membutuhkan token-token dari langkah sebelumnya agar bisa berfungsi. Anda harus membuat satu file konfigurasi rahasia bernama `.env.local` di folder *root* (folder terluar) project.
 
-#### Untuk Pengembangan Lokal (Localhost):
-Buka file `.env.local` di folder *root* project Anda, dan isi dengan kredensial yang sudah Anda dapatkan:
+**Struktur Folder (Project Tree) yang Benar:**
+```text
+arsip-digital/
+├── google-apps-script/
+│   └── Code.gs                  # Kode untuk Google Apps Script
+├── src/
+│   ├── app/                     # Halaman Web (Frontend)
+│   ├── components/              # Komponen UI
+│   └── lib/                     # Konfigurasi & Tipe Data
+├── public/                      # Aset Gambar/Ikon
+├── .env.local                   # ⚠️ BUAT FILE INI DI SINI (SEJAJAR DENGAN package.json)
+├── package.json                 
+├── next.config.mjs              
+└── README.md                    
+```
+
+**Cara Membuat File `.env.local` (Untuk Pengembangan Lokal / Localhost):**
+1. Buka folder project Anda di aplikasi *Code Editor* (misalnya VS Code).
+2. Klik kanan di area folder root, lalu pilih **New File (File Baru)**.
+3. Beri nama file tersebut **tepat**: `.env.local` (tanpa nama tambahan di depan titik).
+4. Buka file `.env.local` tersebut, *copy-paste* kode di bawah ini, lalu ganti tulisan `masukkan_...` dengan *keys/tokens* asli yang sudah Anda catat dari Langkah 1 & Langkah 2:
 
 ```env
-# 1. Google OAuth Credentials (Dari Langkah 2)
+# 1. Google OAuth Credentials (Dari Langkah 2: Google Cloud Console)
 GOOGLE_CLIENT_ID=masukkan_client_id_google_anda_disini
 GOOGLE_CLIENT_SECRET=masukkan_client_secret_google_anda_disini
 
 # 2. NextAuth Configuration
-# Gunakan sembarang teks acak panjang (minimal 32 karakter) untuk token keamanan
+# Gunakan sembarang teks acak panjang (minimal 32 karakter) untuk token keamanan, contoh: rahasia1234567890abcdef
 NEXTAUTH_SECRET=supersecretrandomstring_bisa_diganti_apa_saja_123456789
-# URL utama aplikasi Anda
+# URL utama aplikasi Anda saat di-test di komputer
 NEXTAUTH_URL=http://localhost:3000
 
-# 3. Database Backend (Dari Langkah 1)
+# 3. Database Backend (Dari Langkah 1: Google Apps Script Web App URL)
 APPS_SCRIPT_URL=masukkan_url_deployment_apps_script_anda_disini
 ```
 
